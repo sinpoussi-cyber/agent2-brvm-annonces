@@ -1,0 +1,110 @@
+name: Agent 2 - BRVM Annonces
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+    - cron: '0 20 * * *'
+    - cron: '0 7 * * 1'
+    - cron: '0 7 1 * *'
+  workflow_dispatch:
+
+jobs:
+  collect:
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 */6 * * *'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4 "anthropic==0.49.0" "supabase==2.10.0" python-dotenv google-auth google-auth-oauthlib google-api-python-client "httpx==0.27.0" "httpcore==1.0.9" "websockets>=13.0"
+      - name: Create .env
+        run: |
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
+          echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> .env
+          echo "ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}" >> .env
+          echo "REPORT_EMAIL_FROM=${{ secrets.REPORT_EMAIL_FROM }}" >> .env
+          echo "REPORT_EMAIL_TO=${{ secrets.REPORT_EMAIL_TO }}" >> .env
+          echo "GMAIL_CLIENT_ID=${{ secrets.GMAIL_CLIENT_ID }}" >> .env
+          echo "GMAIL_CLIENT_SECRET=${{ secrets.GMAIL_CLIENT_SECRET }}" >> .env
+          echo "GMAIL_REFRESH_TOKEN=${{ secrets.GMAIL_REFRESH_TOKEN }}" >> .env
+      - name: Create token.json
+        run: echo '${{ secrets.GMAIL_TOKEN_JSON }}' > token.json
+      - name: Run collect
+        run: python main.py --mode=collect
+
+  rapport-jour:
+    if: github.event.schedule == '0 20 * * *'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4 "anthropic==0.49.0" "supabase==2.10.0" python-dotenv google-auth google-auth-oauthlib google-api-python-client "httpx==0.27.0" "httpcore==1.0.9" "websockets>=13.0"
+      - name: Create .env
+        run: |
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
+          echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> .env
+          echo "ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}" >> .env
+          echo "REPORT_EMAIL_FROM=${{ secrets.REPORT_EMAIL_FROM }}" >> .env
+          echo "REPORT_EMAIL_TO=${{ secrets.REPORT_EMAIL_TO }}" >> .env
+          echo "GMAIL_CLIENT_ID=${{ secrets.GMAIL_CLIENT_ID }}" >> .env
+          echo "GMAIL_CLIENT_SECRET=${{ secrets.GMAIL_CLIENT_SECRET }}" >> .env
+          echo "GMAIL_REFRESH_TOKEN=${{ secrets.GMAIL_REFRESH_TOKEN }}" >> .env
+      - name: Create token.json
+        run: echo '${{ secrets.GMAIL_TOKEN_JSON }}' > token.json
+      - name: Run rapport journalier
+        run: python main.py --mode=rapport-jour
+
+  rapport-hebdo:
+    if: github.event.schedule == '0 7 * * 1'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4 "anthropic==0.49.0" "supabase==2.10.0" python-dotenv google-auth google-auth-oauthlib google-api-python-client "httpx==0.27.0" "httpcore==1.0.9" "websockets>=13.0"
+      - name: Create .env
+        run: |
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
+          echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> .env
+          echo "ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}" >> .env
+          echo "REPORT_EMAIL_FROM=${{ secrets.REPORT_EMAIL_FROM }}" >> .env
+          echo "REPORT_EMAIL_TO=${{ secrets.REPORT_EMAIL_TO }}" >> .env
+          echo "GMAIL_CLIENT_ID=${{ secrets.GMAIL_CLIENT_ID }}" >> .env
+          echo "GMAIL_CLIENT_SECRET=${{ secrets.GMAIL_CLIENT_SECRET }}" >> .env
+          echo "GMAIL_REFRESH_TOKEN=${{ secrets.GMAIL_REFRESH_TOKEN }}" >> .env
+      - name: Create token.json
+        run: echo '${{ secrets.GMAIL_TOKEN_JSON }}' > token.json
+      - name: Run rapport hebdo
+        run: python main.py --mode=rapport-hebdo
+
+  rapport-mensuel:
+    if: github.event.schedule == '0 7 1 * *'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4 "anthropic==0.49.0" "supabase==2.10.0" python-dotenv google-auth google-auth-oauthlib google-api-python-client "httpx==0.27.0" "httpcore==1.0.9" "websockets>=13.0"
+      - name: Create .env
+        run: |
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
+          echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> .env
+          echo "ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}" >> .env
+          echo "REPORT_EMAIL_FROM=${{ secrets.REPORT_EMAIL_FROM }}" >> .env
+          echo "REPORT_EMAIL_TO=${{ secrets.REPORT_EMAIL_TO }}" >> .env
+          echo "GMAIL_CLIENT_ID=${{ secrets.GMAIL_CLIENT_ID }}" >> .env
+          echo "GMAIL_CLIENT_SECRET=${{ secrets.GMAIL_CLIENT_SECRET }}" >> .env
+          echo "GMAIL_REFRESH_TOKEN=${{ secrets.GMAIL_REFRESH_TOKEN }}" >> .env
+      - name: Create token.json
+        run: echo '${{ secrets.GMAIL_TOKEN_JSON }}' > token.json
+      - name: Run rapport mensuel
+        run: python main.py --mode=rapport-mensuel
