@@ -1,5 +1,6 @@
 import base64
 import json
+import time
 import anthropic
 from dotenv import load_dotenv
 
@@ -58,6 +59,7 @@ def analyze(titre: str, pdf_bytes: bytes, url: str, page_source: str) -> dict | 
         },
     ]
 
+    time.sleep(3)
     try:
         response = client.messages.create(
             model=MODEL,
