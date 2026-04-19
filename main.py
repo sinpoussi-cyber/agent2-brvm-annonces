@@ -175,8 +175,9 @@ def mode_collect() -> None:
                 continue
 
             # Déduplification
+            nom = doc.get("titre") or url.split("/")[-1]
             if doc_exists(url):
-                log(f"  [SKIP] Déjà en base : {url[:80]}")
+                log(f"  [SKIP] Document déjà analysé : {nom[:80]}")
                 total_skipped += 1
                 continue
 
