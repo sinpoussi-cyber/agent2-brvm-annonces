@@ -48,6 +48,112 @@ def log(msg: str) -> None:
 # Mode : collect
 # ---------------------------------------------------------------------------
 
+def _build_collect_html(
+    date_str: str,
+    total_found: int,
+    total_new: int,
+    total_errors: int,
+    inserted_docs: list,
+) -> str:
+    rows_html = ""
+    for d in inserted_docs:
+        titre   = d.get("titre", "")[:80]
+        societe = d.get("societe_confirmee") or d.get("societe", "")
+        type_doc = d.get("page_source", "")
+        date_doc = d.get("date_doc") or ""
+        rows_html += (
+            f"<tr>"
+            f"<td style='padding:6px 10px;border-bottom:1px solid #e0e0e0'>{titre}</td>"
+            f"<td style='padding:6px 10px;border-bottom:1px solid #e0e0e0'>{societe}</td>"
+            f"<td style='padding:6px 10px;border-bottom:1px solid #e0e0e0'>{type_doc}</td>"
+            f"<td style='padding:6px 10px;border-bottom:1px solid #e0e0e0'>{date_doc}</td>"
+            f"</tr>"
+        )
+
+    if not rows_html:
+        rows_html = (
+            "<tr><td colspan='4' style='padding:10px;text-align:center;color:#888'>"
+            "Aucune nouvelle annonce insérée.</td></tr>"
+        )
+
+    return f"""<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#f4f6f8;font-family:Arial,sans-serif">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f8;padding:30px 0">
+    <tr><td align="center">
+      <table width="620" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.1)">
+
+        <!-- EN-TÊTE -->
+        <tr>
+          <td style="background:#0d2b4e;padding:24px 30px">
+            <h1 style="margin:0;color:#fff;font-size:20px">📢 Agent 2 BRVM — Nouvelles annonces</h1>
+            <p style="margin:6px 0 0;color:#a8c4e0;font-size:13px">{date_str}</p>
+          </td>
+        </tr>
+
+        <!-- STATISTIQUES -->
+        <tr>
+          <td style="padding:24px 30px 10px">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td align="center" style="background:#e8f0fe;border-radius:6px;padding:14px;width:30%">
+                  <div style="font-size:28px;font-weight:bold;color:#0d2b4e">{total_found}</div>
+                  <div style="font-size:12px;color:#555;margin-top:4px">PDFs trouvés</div>
+                </td>
+                <td width="20"></td>
+                <td align="center" style="background:#e6f4ea;border-radius:6px;padding:14px;width:30%">
+                  <div style="font-size:28px;font-weight:bold;color:#1e7e34">{total_new}</div>
+                  <div style="font-size:12px;color:#555;margin-top:4px">Nouveaux insérés</div>
+                </td>
+                <td width="20"></td>
+                <td align="center" style="background:#fce8e6;border-radius:6px;padding:14px;width:30%">
+                  <div style="font-size:28px;font-weight:bold;color:#c5221f">{total_errors}</div>
+                  <div style="font-size:12px;color:#555;margin-top:4px">Erreurs</div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- TABLEAU DES NOUVELLES ANNONCES -->
+        <tr>
+          <td style="padding:20px 30px">
+            <h2 style="margin:0 0 12px;font-size:15px;color:#0d2b4e;border-left:4px solid #0d2b4e;padding-left:10px">
+              Nouvelles annonces insérées
+            </h2>
+            <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:13px">
+              <thead>
+                <tr style="background:#0d2b4e;color:#fff">
+                  <th style="padding:8px 10px;text-align:left;font-weight:600">Titre</th>
+                  <th style="padding:8px 10px;text-align:left;font-weight:600">Société</th>
+                  <th style="padding:8px 10px;text-align:left;font-weight:600">Type</th>
+                  <th style="padding:8px 10px;text-align:left;font-weight:600">Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows_html}
+              </tbody>
+            </table>
+          </td>
+        </tr>
+
+        <!-- FOOTER -->
+        <tr>
+          <td style="background:#f4f6f8;padding:16px 30px;border-top:1px solid #e0e0e0">
+            <p style="margin:0;font-size:11px;color:#999;text-align:center">
+              ⚠️ Cet email est généré automatiquement par l'Agent 2 BRVM. Ne pas répondre à ce message.
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>"""
+
+
 def mode_collect() -> None:
     log("=== DÉMARRAGE : collecte des documents BRVM ===")
 
@@ -55,6 +161,7 @@ def mode_collect() -> None:
     total_new = 0
     total_skipped = 0
     total_errors = 0
+    inserted_docs: list = []
 
     for page_url, page_name in BRVM_PAGES:
         log(f"Scraping : {page_name}")
@@ -117,6 +224,7 @@ def mode_collect() -> None:
             inserted = insert_document(row)
             if inserted:
                 log(f"  [OK]   Inséré : {titre[:60]} ({analysis.get('impact')})")
+                inserted_docs.append(row)
                 total_new += 1
             else:
                 log(f"  [ERR]  Insertion Supabase échouée")
@@ -129,6 +237,13 @@ def mode_collect() -> None:
     log(f"  Ignorés (déjà en base) : {total_skipped}")
     log(f"  Erreurs         : {total_errors}")
     log("=== FIN collecte ===")
+
+    date_str = datetime.now(timezone.utc).strftime("%d/%m/%Y %H:%M UTC")
+    subject = f"📢 Agent 2 BRVM — Nouvelles annonces — {date_str}"
+    html_body = _build_collect_html(date_str, total_found, total_new, total_errors, inserted_docs)
+    log("Envoi de l'email de collecte...")
+    ok = send_report(subject=subject, html_body=html_body)
+    log(f"  → Email collect : {'OK' if ok else 'ÉCHEC'}")
 
 
 # ---------------------------------------------------------------------------
@@ -149,8 +264,7 @@ def _send_rapport(type_rapport: str, fetch_fn, label: str) -> None:
     log("Envoi de l'email...")
     success = send_report(
         subject=report["subject"],
-        body_html=report["body_html"],
-        body_text=report["body_text"],
+        html_body=report["body_html"],
     )
 
     if success:
