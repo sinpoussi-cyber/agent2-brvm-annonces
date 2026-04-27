@@ -6,8 +6,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-client = anthropic.Anthropic()
-
 MODEL = "claude-sonnet-4-20250514"
 
 SYSTEM_PROMPT = """Tu es un analyste financier expert de la Bourse Régionale des Valeurs Mobilières (BRVM)
@@ -42,6 +40,7 @@ def analyze(titre: str, pdf_bytes: bytes, url: str, page_source: str) -> dict | 
     Returns:
         {resume, points_cles, impact, categorie, societe_confirmee}  or  None on failure.
     """
+    client = anthropic.Anthropic()
     base64_data = base64.standard_b64encode(pdf_bytes).decode("utf-8")
 
     content = [

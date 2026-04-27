@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Skill(claude-api)"
+      "Skill(claude-api)",
+      "Bash(gh run *)",
+      "Bash(where gh *)",
+      "Read(//usr/local/bin/**)",
+      "PowerShell(gh run *)",
+      "WebFetch(domain:api.github.com)"
     ]
   }
 }
