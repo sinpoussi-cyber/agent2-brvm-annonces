@@ -1,6 +1,7 @@
 requests
 beautifulsoup4
 anthropic
+pypdf
 supabase
 python-dotenv
 google-auth
