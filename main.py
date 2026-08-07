@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 
 from brvm_scraper import get_new_documents
 from pdf_extractor import extract_pdf
-from claude_analyzer import analyze
+from analyzer import analyze
 from supabase_client import (
     doc_exists,
     insert_document,
