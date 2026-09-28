@@ -101,6 +101,9 @@ def analyze(titre: str, pdf_bytes: bytes, url: str, page_source: str) -> dict | 
             },
         ],
         "response_format": {"type": "json_object"},
+        # deepseek-v4-flash : mode « thinking » actif par défaut → le raisonnement
+        # consomme max_tokens et `content` peut revenir vide. Désactivé ici.
+        "thinking": {"type": "disabled"},
         "max_tokens": 1024,
         "temperature": 0,
         "stream": False,
